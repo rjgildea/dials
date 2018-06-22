@@ -40,6 +40,8 @@ padding = 4
   .type = int(value_min=0)
 output_dir = None
   .type = path
+filename = None
+  .type = path
 display = *image mean variance dispersion sigma_b \
           sigma_s threshold global_threshold
   .type = choice
@@ -114,10 +116,14 @@ def imageset_as_bitmaps(imageset, params):
   if not (binning > 0 and ((binning & (binning - 1)) == 0)):
     raise Sorry("binning must be a power of 2")
   output_dir = params.output_dir
-  if output_dir is None:
-    output_dir = "."
-  elif not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+  if params.filename is not None:
+    assert len(imageset) == 1
+    assert output_dir is None
+  else:
+    if output_dir is None:
+      output_dir = "."
+    elif not os.path.exists(output_dir):
+      os.makedirs(output_dir)
   output_files = []
 
   detector = imageset.get_detector()
@@ -138,9 +144,6 @@ def imageset_as_bitmaps(imageset, params):
     start, end = 1, len(imageset)
   for i_image in range(start, end+1):
     image = imageset.get_raw_data(i_image-start)
-
-    #if len(detector) == 1:
-      #image = [image]
 
     trange = [p.get_trusted_range() for p in detector]
     mask = imageset.get_mask(i_image-start)
@@ -199,8 +202,11 @@ def imageset_as_bitmaps(imageset, params):
                        flex_image.size1()//binning),
                        flex_image.export_string)
     format_str = "%%0%dd" % params.padding
-    path = os.path.join(
-      output_dir, params.prefix + (format_str % i_image) + '.' + params.format)
+    if params.filename is not None:
+      path = params.filename
+    else:
+      path = os.path.join(
+        output_dir, params.prefix + (format_str % i_image) + '.' + params.format)
 
     print("Exporting %s" %path)
     output_files.append(path)
