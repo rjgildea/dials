@@ -36,6 +36,8 @@ format = jpeg *png tiff
   .type = choice
 prefix = "image"
   .type = str
+padding = 4
+  .type = int(value_min=0)
 output_dir = None
   .type = path
 display = *image mean variance dispersion sigma_b \
@@ -196,8 +198,9 @@ def imageset_as_bitmaps(imageset, params):
                       (flex_image.size2()//binning,
                        flex_image.size1()//binning),
                        flex_image.export_string)
+    format_str = "%%0%dd" % params.padding
     path = os.path.join(
-      output_dir, params.prefix + ("%04d" % i_image) + '.' + params.format)
+      output_dir, params.prefix + (format_str % i_image) + '.' + params.format)
 
     print("Exporting %s" %path)
     output_files.append(path)
