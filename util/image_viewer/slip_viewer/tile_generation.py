@@ -258,7 +258,7 @@ class _Tiles(object):
         if not isinstance(raw_data, tuple):
           raw_data = (raw_data,)
 
-        if len(detector) > 1:
+        if True:#len(detector) > 1:
           self.flex_image = _get_flex_image_multipanel(
             brightness=self.current_brightness / 100,
             panels=detector,
@@ -290,7 +290,7 @@ class _Tiles(object):
       if len(detector) == 1 and len(raw_image_data) == 1:
         raw_image_data = raw_image_data[0]
 
-      if len(detector) > 1:
+      if True:#len(detector) > 1:
         self.flex_image = _get_flex_image_multipanel(
           brightness=self.current_brightness / 100,
           panels=detector,
@@ -312,7 +312,7 @@ class _Tiles(object):
         if not isinstance(raw_data, tuple):
           raw_data = (raw_data,)
 
-        if len(self.raw_image.get_detector()) > 1:
+        if True:#len(self.raw_image.get_detector()) > 1:
           # XXX Special-case read of new-style images until multitile
           # images are fully supported in dxtbx.
           self.flex_image = _get_flex_image_multipanel(
@@ -448,12 +448,12 @@ class _Tiles(object):
       import sys
       detector = self.raw_image.get_detector()
       if sys.platform.lower().find("linux") >= 0:
-        if len(detector) > 1:
+        if True:#len(detector) > 1:
           return 0.,0.
         else:
           return self.center_x_lon-self.extent[0], self.center_y_lat-self.extent[3]
       else:
-        if len(detector) > 1:
+        if True:#len(detector) > 1:
           return self.extent[0], self.extent[3]
         else:
           return self.center_x_lon, self.center_y_lat
@@ -500,7 +500,7 @@ class _Tiles(object):
       # slow is pointing down (x).  fast is pointing right (y).
 
       detector = self.raw_image.get_detector()
-      if len(detector) == 1:
+      if False:#len(detector) == 1:
         (size2, size1) = detector[0].get_image_size()
       else:
         # XXX Special-case until multitile detectors fully supported.
@@ -514,7 +514,7 @@ class _Tiles(object):
       # inverse of the preceding function
 
       detector = self.raw_image.get_detector()
-      if detector.num_panels() == 1:
+      if False:#detector.num_panels() == 1:
         (size1, size2) = detector.get_image_size()
       else:
         # XXX Special-case until multitile detectors fully supported.
@@ -644,7 +644,7 @@ class _Tiles(object):
 
     def get_detector_distance (self) :
         detector = self.raw_image.get_detector()
-        if len(detector) == 1:
+        if False:#len(detector) == 1:
           dist = abs(detector[0].get_distance())
         else:
           # XXX Special-case until multitile detectors fully
@@ -660,7 +660,7 @@ class _Tiles(object):
         from scitbx.matrix import col
 
         detector = self.raw_image.get_detector()
-        if len(detector) == 1:
+        if False:#len(detector) == 1:
           n = col(detector[0].get_normal())
           s0 = col(self.raw_image.get_beam().get_unit_s0())
           two_theta = s0.angle(n, deg=False)
