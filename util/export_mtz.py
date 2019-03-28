@@ -54,7 +54,7 @@ def _add_batch(mtz, experiment, batch_number, image_number, force_static_model):
         F = matrix.sqr((1, 0, 0, 0, 1, 0, 0, 0, 1))
 
     # Create the batch object and start configuring it
-    o = mtz.add_batch().set_num(batch_number).set_nbsetid(1).set_ncryst(1)
+    o = mtz.add_batch_no_check(batch_number).set_nbsetid(1).set_ncryst(1)
     o.set_time1(0.0).set_time2(0.0).set_title("Batch {}".format(batch_number))
     o.set_ndet(1).set_theta(flex.float((0.0, 0.0))).set_lbmflg(0)
     o.set_alambd(wavelength).set_delamb(0.0).set_delcor(0.0)
@@ -439,7 +439,10 @@ def export_mtz(integrated_data, experiment_list, params):
         s0n = matrix.col(s0).normalize().elems
         logger.debug("Beam vector: %.4f %.4f %.4f" % s0n)
 
+        import time as _time
+
         for i in range(image_range[0], image_range[1] + 1):
+            t0 = _time.time()
             _add_batch(
                 mtz_file,
                 experiment,
@@ -447,6 +450,8 @@ def export_mtz(integrated_data, experiment_list, params):
                 image_number=i,
                 force_static_model=params.mtz.force_static_model,
             )
+            t1 = _time.time()
+            print("TIME %d %f" % (i, t1 - t0))
 
         # Create the batch offset array. This gives us an experiment (id)-dependent
         # batch offset to calculate the correct batch from image number.
