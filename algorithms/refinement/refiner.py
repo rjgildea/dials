@@ -364,7 +364,7 @@ class RefinerFactory(object):
         logger.debug("Refinement engine built")
 
         # build refiner interface and return
-        if params.refinement.parameterisation.scan_varying is True:
+        if params.refinement.parameterisation.scan_varying:
             refiner = ScanVaryingRefiner
         else:
             refiner = Refiner
