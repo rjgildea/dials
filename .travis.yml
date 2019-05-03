@@ -45,12 +45,14 @@ jobs:
     - name: "Syntax validation - Python 2.7"
       addons: false
       cache: false
+      before_cache: false
       script:
          - python -m compileall -q *
 
     - name: "Syntax validation - Python 3.7"
       addons: false
       cache: false
+      before_cache: false
       dist: xenial
       python: 3.7
       script:
@@ -77,12 +79,14 @@ jobs:
     - name: "Flake8 - Python 2.7"
       addons: false
       cache: false
+      before_cache: false
       script:
          - .travis/run-flake8
 
     - name: "Flake8 - Python 3.7"
       addons: false
       cache: false
+      before_cache: false
       dist: xenial
       python: 3.7
       script:
