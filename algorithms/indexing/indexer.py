@@ -500,7 +500,7 @@ class indexer_base(object):
             )
 
         if self.params.debug:
-            self.debug_write_reciprocal_lattice_points_as_pdb()
+            self._debug_write_reciprocal_lattice_points_as_pdb()
 
         self.reflections["id"] = flex.int(len(self.reflections), -1)
 
@@ -816,9 +816,7 @@ class indexer_base(object):
 
     def _xyzcal_mm_to_px(self, experiments, reflections):
         # set xyzcal.px field in reflections
-        reflections["xyzcal.px"] = flex.vec3_double(
-            len(reflections)
-        )
+        reflections["xyzcal.px"] = flex.vec3_double(len(reflections))
         for i, expt in enumerate(experiments):
             imgset_sel = reflections["imageset_id"] == i
             refined_reflections = reflections.select(imgset_sel)
@@ -940,7 +938,7 @@ class indexer_base(object):
         )
         return refiner.get_experiments(), reflections
 
-    def debug_write_reciprocal_lattice_points_as_pdb(
+    def _debug_write_reciprocal_lattice_points_as_pdb(
         self, file_name="reciprocal_lattice.pdb"
     ):
         from cctbx import crystal, xray
