@@ -171,6 +171,7 @@ ArgumentHandlingErrorInfo = namedtuple(
     ["name", "validation", "message", "traceback", "type", "exception"],
 )
 
+
 class Importer(object):
     """ A class to import the command line arguments. """
 
@@ -188,7 +189,6 @@ class Importer(object):
         scan_tolerance=None,
         format_kwargs=None,
         load_models=True,
-        propagate_geom=False,
     ):
         """
         Parse the arguments. Populates its instance attributes in an intelligent way
@@ -209,8 +209,6 @@ class Importer(object):
         :param check_format: Check the format when reading images
         :param verbose: True/False print out some stuff
         :param load_models: whether to load models from every experiment
-        :param propagate_geom: for stills importing, whether to propagte initial geom for all stills
-                    mainly for when using image viewer
         """
 
         # Initialise output
@@ -231,7 +229,6 @@ class Importer(object):
                 scan_tolerance,
                 format_kwargs,
                 load_models,
-                propagate_geom,
             )
 
         # Second try to read experiment files
@@ -267,10 +264,10 @@ class Importer(object):
         scan_tolerance,
         format_kwargs,
         load_models=True,
-        propagate_geom=False,
     ):
         """
         Try to import images.
+
         :param args: The input arguments
         :param verbose: Print verbose output
         :param compare_beam:
@@ -307,7 +304,6 @@ class Importer(object):
             scan_tolerance=scan_tolerance,
             format_kwargs=format_kwargs,
             load_models=load_models,  # default is True in from_filenames
-            propagate_geom=propagate_geom,
         )
         if len(experiments) > 0:
             filename = "<image files>"
@@ -486,7 +482,7 @@ class PhilCommandParser(object):
             elif arg.find("=") >= 0:
                 try:
                     user_phils.append(interpretor.process_arg(arg=arg))
-                except Exception:  # FIXME : unknown exception here .. Why not Sorry ?
+                except Exception:
                     if return_unhandled:
                         unhandled.append(arg)
                     else:
@@ -551,16 +547,12 @@ class PhilCommandParser(object):
             scan_tolerance = None
             format_kwargs = None
 
-        # Try to import everything
         try:
             load_models = params.load_models
         except AttributeError:
             load_models = True  # NOTE: this is defaulted in Importer as True already
-        try:
-            propagate_geom = params.propagate_geom_for_stills
-        except AttributeError:
-            propagate_geom = False
 
+        # Try to import everything
         importer = Importer(
             unhandled,
             read_experiments=self._read_experiments,
@@ -574,7 +566,6 @@ class PhilCommandParser(object):
             scan_tolerance=scan_tolerance,
             format_kwargs=format_kwargs,
             load_models=load_models,
-            propagate_geom=propagate_geom,
         )
 
         # Grab a copy of the errors that occured in case the caller wants them
