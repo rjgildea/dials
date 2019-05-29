@@ -117,6 +117,14 @@ predict_reflections = False
 include scope dials.algorithms.profile_model.factory.phil_scope
 include scope dials.algorithms.spot_prediction.reflection_predictor.phil_scope
 
+load_models = True
+  .type = bool
+  .help = "Whether to load every models which matters for large image files"
+
+propagate_geom_for_stills = False
+  .type = bool
+  .help = "whether to propagate the detector and beam for all experiments
+          since one probably doesnt want to load them all..."
 """,
     process_includes=True,
 )
@@ -192,10 +200,10 @@ if __name__ == "__main__":
         exit(0)
 
     flat_expts = flatten_experiments(params.input.experiments)
-    if not all([e.detector for e in flat_expts]):
-        sys.exit("Error: experiment has no detector")
-    if not all([e.beam for e in flat_expts]):
-        sys.exit("Error: experiment has no beam")
+    if not all([e.detector is not None for e in flat_expts]):
+        raise AttributeError("Error: Each experiment needs a  detector")
+    if not all([e.beam is not None for e in flat_expts]):
+        raise AttributeError("Error: Each experiment needs a  beam")
 
     if params.mask is not None:
         from libtbx import easy_pickle

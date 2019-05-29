@@ -171,7 +171,6 @@ ArgumentHandlingErrorInfo = namedtuple(
     ["name", "validation", "message", "traceback", "type", "exception"],
 )
 
-
 class Importer(object):
     """ A class to import the command line arguments. """
 
@@ -188,6 +187,8 @@ class Importer(object):
         compare_goniometer=None,
         scan_tolerance=None,
         format_kwargs=None,
+        load_models=True,
+        propagate_geom=False,
     ):
         """
         Parse the arguments. Populates its instance attributes in an intelligent way
@@ -207,7 +208,9 @@ class Importer(object):
         :param read_experiments_from_images: Try to read the experiments from images
         :param check_format: Check the format when reading images
         :param verbose: True/False print out some stuff
-
+        :param load_models: whether to load models from every experiment
+        :param propagate_geom: for stills importing, whether to propagte initial geom for all stills
+                    mainly for when using image viewer
         """
 
         # Initialise output
@@ -227,6 +230,8 @@ class Importer(object):
                 compare_goniometer,
                 scan_tolerance,
                 format_kwargs,
+                load_models,
+                propagate_geom,
             )
 
         # Second try to read experiment files
@@ -261,14 +266,22 @@ class Importer(object):
         compare_goniometer,
         scan_tolerance,
         format_kwargs,
+        load_models=True,
+        propagate_geom=False,
     ):
         """
         Try to import images.
-
         :param args: The input arguments
         :param verbose: Print verbose output
+        :param compare_beam:
+        :param compare_detector:
+        :param compare_goniometer:
+        :param scan_tolerance:
+        :param format_kwargs:
+        :param load_models: whether to load all models for expLists
+        :param propagate_geom: for stills, whether to propagate the initial images geometry to all experiments
+          (mainly used for imageviewer)
         :return: Unhandled arguments
-
         """
         from dxtbx.model.experiment_list import ExperimentListFactory
         from dials.util.phil import FilenameDataWrapper, ExperimentListConverters
@@ -293,6 +306,8 @@ class Importer(object):
             compare_goniometer=compare_goniometer,
             scan_tolerance=scan_tolerance,
             format_kwargs=format_kwargs,
+            load_models=load_models,  # default is True in from_filenames
+            propagate_geom=propagate_geom,
         )
         if len(experiments) > 0:
             filename = "<image files>"
@@ -471,7 +486,7 @@ class PhilCommandParser(object):
             elif arg.find("=") >= 0:
                 try:
                     user_phils.append(interpretor.process_arg(arg=arg))
-                except Exception:
+                except Exception:  # FIXME : unknown exception here .. Why not Sorry ?
                     if return_unhandled:
                         unhandled.append(arg)
                     else:
@@ -522,11 +537,12 @@ class PhilCommandParser(object):
             # FIXME Should probably make this smarter since it requires editing here
             # and in dials.import phil scope
             try:
-                format_kwargs = {
-                    "dynamic_shadowing": params.format.dynamic_shadowing,
-                    "multi_panel": params.format.multi_panel,
-                }
-            except Exception:
+                format_kwargs = {}
+                for name, instance in vars(params.format).items():
+                    if name.startswith("__") and name.endswith("__"):
+                        continue
+                    format_kwargs[name] = instance
+            except AttributeError:
                 format_kwargs = None
         else:
             compare_beam = None
@@ -536,6 +552,15 @@ class PhilCommandParser(object):
             format_kwargs = None
 
         # Try to import everything
+        try:
+            load_models = params.load_models
+        except AttributeError:
+            load_models = True  # NOTE: this is defaulted in Importer as True already
+        try:
+            propagate_geom = params.propagate_geom_for_stills
+        except AttributeError:
+            propagate_geom = False
+
         importer = Importer(
             unhandled,
             read_experiments=self._read_experiments,
@@ -548,6 +573,8 @@ class PhilCommandParser(object):
             compare_goniometer=compare_goniometer,
             scan_tolerance=scan_tolerance,
             format_kwargs=format_kwargs,
+            load_models=load_models,
+            propagate_geom=propagate_geom,
         )
 
         # Grab a copy of the errors that occured in case the caller wants them
