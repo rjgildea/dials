@@ -464,6 +464,9 @@ class stills_indexer(indexer_base):
                 )
                 ref_predictor(refined_reflections)
 
+            elif self.params.refinement_protocol.mode == "ignore":
+                refined_experiments, refined_reflections = experiments, reflections_for_refinement
+
             else:
                 try:
                     refined_experiments, refined_reflections = self.refine(
@@ -817,7 +820,7 @@ class stills_indexer(indexer_base):
         results = flex.double([c.rmsd for c in candidates])
         best = candidates[flex.min_index(results)]
         print(best)
-
+        self.best_Amat_rmsd = best.rmsd
         if params.indexing.stills.refine_all_candidates:
             if best.rmsd > params.indexing.stills.rmsd_min_px:
                 raise Sorry("RMSD too high, %f" % best.rmsd)
